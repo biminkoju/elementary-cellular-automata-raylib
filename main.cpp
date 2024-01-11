@@ -9,7 +9,7 @@
 
 #define GRID_SIZE 10
 
-#define ruleSetNo 88
+#define ruleSetNo 200
 struct coords {
     int x;
     int y;
@@ -59,26 +59,15 @@ int main(void) {
         rCell.color = (rCell.keyVal == 1 ? BLUE : RED);
         initialCellArray.push_back(rCell);
     }
+    SetTargetFPS(60);
     while (!WindowShouldClose()) {
-        screenCells.push_back(initialCellArray);
-        if (screenCells.size() > GetScreenHeight() / GRID_SIZE) {
-            screenCells.erase(screenCells.begin());
-            std::rotate(screenCells.begin(), screenCells.begin() + 1, screenCells.end());
-
-            // Adjust the y-coordinate of the shifted row
-            for (auto &row : screenCells) {
-                for (auto &cell : row) {
-                    cell.cellCoords.y -= GRID_SIZE;
-                }
-            }
-        };
         BeginDrawing();
         for (const auto &rowarray : screenCells) {
             for (const auto &i : rowarray) {
                 DrawRectangleRec(i.cell, i.color);
             }
         }
-
+        ClearBackground(BLACK);
         EndDrawing();
         newinitialCellArray.clear();
         for (size_t i = 0; i < initialCellArray.size(); i++) {
@@ -88,6 +77,16 @@ int main(void) {
         }
         initialCellArray.clear();
         initialCellArray = std::move(newinitialCellArray);
+
+        if (screenCells.size() > GetScreenHeight() / GRID_SIZE) {
+            screenCells.erase(screenCells.begin());
+            std::rotate(screenCells.begin(), screenCells.begin() + 1, screenCells.end());
+            for (size_t i = 0; i < screenCells.front().size(); i++) {
+                screenCells.front()[i].cellCoords.y = screenCells.back()[i].cellCoords.y - GRID_SIZE;
+            }
+        } else {
+            screenCells.push_back(initialCellArray);
+        }
     }
 
     CloseWindow();
